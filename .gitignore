@@ -41,3 +41,6 @@ prisma/generated/
 
 # TypeScript
 *.tsbuildinfo
+
+# Product Specification
+PRODUCT_SPEC.md
