@@ -10,8 +10,10 @@
     "clean": "turbo run clean"
   },
   "devDependencies": {
+    "@typescript-eslint/parser": "^8.67.0",
     "turbo": "^2.5.4",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.67.0"
   },
   "engines": {
     "node": ">=20.0.0",

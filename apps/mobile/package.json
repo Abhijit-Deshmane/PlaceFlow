@@ -4,17 +4,19 @@
   "main": "expo-router/entry",
   "private": true,
   "scripts": {
-    "dev": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web",
+    "dev": "npx expo start",
+    "android": "npx expo start --android",
+    "ios": "npx expo start --ios",
+    "web": "npx expo start --web",
     "typecheck": "tsc --noEmit",
     "lint": "eslint app/"
   },
   "dependencies": {
+    "@clerk/clerk-expo": "^2.20.0",
     "@placeflow/shared": "workspace:*",
     "expo": "~57.0.15",
     "expo-router": "~5.0.7",
+    "expo-secure-store": "~14.0.1",
     "expo-status-bar": "~57.0.1",
     "nativewind": "^4.1.23",
     "react": "19.2.8",
