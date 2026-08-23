@@ -13,22 +13,30 @@ datasource db {
 // ─── Enums ─────────────────────────────────────────────────────────────────────
 
 enum UserRole {
-  STUDENT
-  FACULTY
-  ADMIN
+  SUPER_ADMIN
+  COLLEGE_ADMIN
+  PLACEMENT_OFFICER
   RECRUITER
+  STUDENT
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
 }
 
 // ─── Models ────────────────────────────────────────────────────────────────────
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String
-  password  String
-  role      UserRole @default(STUDENT)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String     @id @default(cuid())
+  clerkUserId String     @unique
+  email       String     @unique
+  name        String?
+  role        UserRole   @default(STUDENT)
+  status      UserStatus @default(ACTIVE)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 
   @@map("users")
 }
