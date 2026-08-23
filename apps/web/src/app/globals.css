@@ -1,26 +1,355 @@
 @import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap");
 
+/* ==========================================================================
+   PlaceFlow Design System v1.0 — Web (Tailwind CSS v4)
+   "A warm-neutral foundation with a confident navy accent and a full semantic
+    status language for placement pipelines."
+
+   Token hierarchy:
+   1. Primitive tokens  — raw named values from the design system
+   2. Semantic tokens   — purpose-driven aliases
+   3. Component tokens  — component-scoped sizing/styling
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Primitive Tokens  (light mode / default)
+   -------------------------------------------------------------------------- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* ── 01 · Neutrals (warm, parchment-toned) ────────────────────────────── */
+  --bg-canvas:      #F5F3EF; /* page/canvas background */
+  --bg-card:        #FBFAF8; /* default card/surface */
+  --bg-card-alt:    #EFEDE8; /* alternate card / section */
+  --border-subtle:  #E4E1DA; /* dividers, borders */
+  --text-primary:   #1C1B19; /* near-black, warm */
+  --text-secondary: #6F6C66; /* medium warm gray */
+
+  /* Derived neutral helpers */
+  --text-tertiary:  #9E9B97;
+  --text-disabled:  #B8B5B1;
+  --text-inverse:   #FBFAF8;
+  --text-on-brand:  #FFFFFF;
+
+  /* ── 02 · Brand Accent (confident dark navy) ──────────────────────────── */
+  --brand-primary:       #1E3A5F;
+  --brand-primary-hover: #16293F;
+  --brand-tint:          #E8EEF5;
+
+  /* ── 03 · Semantic — Placement Status ────────────────────────────────── */
+  --status-placed:           #1E8E5A;
+  --status-placed-tint:      #E5F5EC;
+  --status-in-process:       #C77D14;
+  --status-in-process-tint:  #FBF0DF;
+  --status-applied:          #3B6FA8;
+  --status-applied-tint:     #E8F0F8;
+  --status-not-eligible:     #C43D3D;
+  --status-not-eligible-tint:#FBEAEA;
+  --status-draft:            #8A8680;
+  --status-draft-tint:       #EFEDE8;
+
+  /* ── Shadows ─────────────────────────────────────────────────────────── */
+  --shadow-card:  0 1px 3px rgba(28, 27, 25, 0.06), 0 1px 2px rgba(28, 27, 25, 0.04);
+  --shadow-hover: 0 4px 12px rgba(28, 27, 25, 0.08), 0 2px 4px rgba(28, 27, 25, 0.04);
+  --shadow-modal: 0 16px 32px rgba(28, 27, 25, 0.12), 0 4px 8px rgba(28, 27, 25, 0.08);
+
+  /* ── Component Tokens ─────────────────────────────────────────────────── */
+
+  /* Buttons */
+  --btn-height-sm:     32px;
+  --btn-height-md:     40px;
+  --btn-height-lg:     48px;
+  --btn-radius:        9999px; /* pill shape — as seen in screenshot */
+  --btn-font-size:     15px;
+  --btn-font-weight:   600;
+  --btn-padding-x:     20px;
+
+  /* Inputs */
+  --input-height:      40px;
+  --input-radius:      8px;
+  --input-border:      var(--border-subtle);
+  --input-bg:          var(--bg-card);
+  --input-focus-ring:  0 0 0 3px rgba(30, 58, 95, 0.15);
+
+  /* Cards */
+  --card-radius:       12px;
+  --card-padding:      20px;
+  --card-bg:           var(--bg-card);
+  --card-border:       var(--border-subtle);
+  --card-shadow:       var(--shadow-card);
+
+  /* Badge */
+  --badge-height:      26px;
+  --badge-radius:      9999px;
+  --badge-padding-x:   10px;
+  --badge-font-size:   13px;
+  --badge-font-weight: 500;
+
+  /* Metric card */
+  --metric-font-size:   26px;
+  --metric-font-weight: 800;
+
+  /* Layout */
+  --sidebar-width:  256px;
+  --header-height:  64px;
+  --page-max-width: 1280px;
+  --page-padding-x: 24px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
+/* --------------------------------------------------------------------------
+   Dark Mode Overrides
+   -------------------------------------------------------------------------- */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --bg-canvas:      #141310;
+    --bg-card:        #1C1B18;
+    --bg-card-alt:    #242320;
+    --border-subtle:  rgba(228, 225, 218, 0.12);
+    --text-primary:   #F0EDE8;
+    --text-secondary: #9E9B97;
+    --text-tertiary:  #6F6C66;
+    --text-disabled:  #4A4845;
+    --text-inverse:   #141310;
+
+    --brand-primary:       #3B6FA8;  /* lighter navy in dark mode */
+    --brand-primary-hover: #2E5A8A;
+    --brand-tint:          rgba(59, 111, 168, 0.15);
+
+    --card-bg:     #1C1B18;
+    --card-border: rgba(228, 225, 218, 0.10);
+    --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    --input-bg:    #242320;
+    --input-border: rgba(228, 225, 218, 0.15);
   }
 }
 
+/* --------------------------------------------------------------------------
+   Tailwind v4 — @theme: register all tokens as Tailwind utilities
+   -------------------------------------------------------------------------- */
+@theme inline {
+  /* Fonts */
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  /* ── Typography scale (from design system) ──────────────────────────── */
+  /* Display · 32 / 800 */
+  /* H1      · 22 / 700 */
+  /* H2      · 17 / 600 */
+  /* Body    · 15 / 400 */
+  /* Metric  · 26 / 800 */
+  /* Caption · 13 / 400 */
+  --text-caption: 13px;
+  --text-sm:      14px;
+  --text-body:    15px;
+  --text-h2:      17px;
+  --text-base:    16px;
+  --text-h1:      22px;
+  --text-metric:  26px;
+  --text-display: 32px;
+  --text-xl:      20px;
+  --text-2xl:     24px;
+
+  /* ── Colors — Neutrals ──────────────────────────────────────────────── */
+  --color-canvas:       var(--bg-canvas);
+  --color-card:         var(--bg-card);
+  --color-card-alt:     var(--bg-card-alt);
+  --color-border:       var(--border-subtle);
+  --color-text:         var(--text-primary);
+  --color-text-muted:   var(--text-secondary);
+  --color-text-faint:   var(--text-tertiary);
+  --color-text-disabled: var(--text-disabled);
+  --color-text-inverse: var(--text-inverse);
+  --color-text-on-brand: var(--text-on-brand);
+
+  /* ── Colors — Brand ─────────────────────────────────────────────────── */
+  --color-brand:       var(--brand-primary);
+  --color-brand-hover: var(--brand-primary-hover);
+  --color-brand-tint:  var(--brand-tint);
+
+  /* ── Colors — Status ────────────────────────────────────────────────── */
+  --color-placed:               var(--status-placed);
+  --color-placed-tint:          var(--status-placed-tint);
+  --color-in-process:           var(--status-in-process);
+  --color-in-process-tint:      var(--status-in-process-tint);
+  --color-applied:              var(--status-applied);
+  --color-applied-tint:         var(--status-applied-tint);
+  --color-not-eligible:         var(--status-not-eligible);
+  --color-not-eligible-tint:    var(--status-not-eligible-tint);
+  --color-draft:                var(--status-draft);
+  --color-draft-tint:           var(--status-draft-tint);
+
+  /* ── Border Radius ──────────────────────────────────────────────────── */
+  --radius-none: 0px;
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-2xl:  24px;
+  --radius-full: 9999px;
+
+  /* ── Shadows ─────────────────────────────────────────────────────────── */
+  --shadow-card:  var(--shadow-card);
+  --shadow-hover: var(--shadow-hover);
+  --shadow-modal: var(--shadow-modal);
+
+  /* ── Spacing additions ───────────────────────────────────────────────── */
+  --spacing-18: 72px;
+  --spacing-22: 88px;
+  --size-sidebar: var(--sidebar-width);
+  --size-header:  var(--header-height);
+}
+
+/* --------------------------------------------------------------------------
+   Base Styles
+   -------------------------------------------------------------------------- */
+html,
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
+  font-size: 15px;        /* Body default from design system */
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus ring — brand color */
+:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Selection */
+::selection {
+  background-color: var(--brand-tint);
+  color: var(--brand-primary);
+}
+
+/* --------------------------------------------------------------------------
+   Typography Utility Classes
+   (Mirror the design system type specimen exactly)
+   -------------------------------------------------------------------------- */
+
+/* Display · 32px / 800 */
+.text-display {
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+}
+
+/* H1 · 22px / 700 */
+.text-h1 {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text-primary);
+}
+
+/* H2 · 17px / 600 */
+.text-h2 {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--text-primary);
+}
+
+/* Body · 15px / 400 */
+.text-body {
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+/* Metric · 26px / 800 */
+.text-metric {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--text-primary);
+  letter-spacing: -0.3px;
+}
+
+/* Caption · 13px / 400 */
+.text-caption {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+/* --------------------------------------------------------------------------
+   03 · Placement Status Badge Utilities
+   Pill-shaped, colored dot + label pattern from the design system.
+   -------------------------------------------------------------------------- */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: var(--badge-height);
+  padding: 0 var(--badge-padding-x);
+  border-radius: var(--badge-radius);
+  font-size: var(--badge-font-size);
+  font-weight: var(--badge-font-weight);
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.status-badge::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Placed */
+.status-badge--placed {
+  background-color: var(--status-placed-tint);
+  color: var(--status-placed);
+}
+.status-badge--placed::before {
+  background-color: var(--status-placed);
+}
+
+/* In Process */
+.status-badge--in-process {
+  background-color: var(--status-in-process-tint);
+  color: var(--status-in-process);
+}
+.status-badge--in-process::before {
+  background-color: var(--status-in-process);
+}
+
+/* Applied */
+.status-badge--applied {
+  background-color: var(--status-applied-tint);
+  color: var(--status-applied);
+}
+.status-badge--applied::before {
+  background-color: var(--status-applied);
+}
+
+/* Not Eligible */
+.status-badge--not-eligible {
+  background-color: var(--status-not-eligible-tint);
+  color: var(--status-not-eligible);
+}
+.status-badge--not-eligible::before {
+  background-color: var(--status-not-eligible);
+}
+
+/* Draft */
+.status-badge--draft {
+  background-color: var(--status-draft-tint);
+  color: var(--status-draft);
+}
+.status-badge--draft::before {
+  background-color: var(--status-draft);
 }
