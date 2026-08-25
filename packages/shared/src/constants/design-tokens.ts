@@ -73,10 +73,10 @@ export const COLOR_STATUS = {
   },
 } as const;
 
-export type PlacementStatus = keyof typeof COLOR_STATUS;
+export type PlacementStatusColor = keyof typeof COLOR_STATUS;
 
 /** Convenience map: status → foreground color */
-export const STATUS_COLORS: Record<PlacementStatus, string> = {
+export const STATUS_COLORS: Record<PlacementStatusColor, string> = {
   placed:      COLOR_STATUS.placed.DEFAULT,
   inProcess:   COLOR_STATUS.inProcess.DEFAULT,
   applied:     COLOR_STATUS.applied.DEFAULT,
@@ -85,7 +85,7 @@ export const STATUS_COLORS: Record<PlacementStatus, string> = {
 } as const;
 
 /** Convenience map: status → tint (background) color */
-export const STATUS_TINTS: Record<PlacementStatus, string> = {
+export const STATUS_TINTS: Record<PlacementStatusColor, string> = {
   placed:      COLOR_STATUS.placed.tint,
   inProcess:   COLOR_STATUS.inProcess.tint,
   applied:     COLOR_STATUS.applied.tint,

@@ -65,10 +65,10 @@ export const status = {
   },
 } as const;
 
-export type PlacementStatus = keyof typeof status;
+export type PlacementStatusColor = keyof typeof status;
 
 /** Quick access: status key → foreground color */
-export const STATUS_COLORS: Record<PlacementStatus, string> = {
+export const STATUS_COLORS: Record<PlacementStatusColor, string> = {
   placed:      status.placed.color,
   inProcess:   status.inProcess.color,
   applied:     status.applied.color,
@@ -77,7 +77,7 @@ export const STATUS_COLORS: Record<PlacementStatus, string> = {
 } as const;
 
 /** Quick access: status key → tint (background) color */
-export const STATUS_TINTS: Record<PlacementStatus, string> = {
+export const STATUS_TINTS: Record<PlacementStatusColor, string> = {
   placed:      status.placed.tint,
   inProcess:   status.inProcess.tint,
   applied:     status.applied.tint,
