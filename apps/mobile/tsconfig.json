@@ -3,6 +3,9 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
+      "@/*": [
+        "./*"
+      ],
       "@placeflow/shared": [
         "../../packages/shared/src/index.ts"
       ]
@@ -10,6 +13,7 @@
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    "nativewind-env.d.ts"
   ]
 }

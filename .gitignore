@@ -38,6 +38,8 @@ Thumbs.db
 
 # Prisma
 prisma/generated/
+src/generated/
+**/generated/
 
 # TypeScript
 *.tsbuildinfo

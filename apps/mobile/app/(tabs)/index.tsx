@@ -1,6 +1,7 @@
 import React from "react";
-import { View, Text, TouchableOpacity, SafeAreaView, ScrollView } from "react-native";
-import { useAuth, useUser } from "@clerk/clerk-expo";
+import { View, Text, TouchableOpacity, ScrollView } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuth, useUser } from "@clerk/expo";
 import { useRouter } from "expo-router";
 
 export default function DashboardScreen() {

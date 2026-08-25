@@ -16,10 +16,12 @@
   "dependencies": {
     "@clerk/backend": "^3.16.10",
     "@placeflow/shared": "workspace:*",
-    "@prisma/client": "^6.10.1",
+    "@prisma/adapter-pg": "^7.0.0",
+    "@prisma/client": "^7.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^4.21.2",
+    "pg": "^8.13.3",
     "svix": "^2.0.0",
     "zod": "^3.25.67"
   },
@@ -27,7 +29,8 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.3",
     "@types/node": "^22.15.34",
-    "prisma": "^6.10.1",
+    "@types/pg": "^8.11.11",
+    "prisma": "^7.0.0",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3"
   }

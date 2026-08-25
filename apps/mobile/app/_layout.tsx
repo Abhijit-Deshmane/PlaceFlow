@@ -1,7 +1,8 @@
-import { ClerkProvider } from "@clerk/clerk-expo";
+import "../global.css";
+import { ClerkProvider } from "@clerk/expo";
+import { tokenCache } from "@clerk/expo/token-cache";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { tokenCache } from "../lib/token-cache";
 
 const publishableKey =
   process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY ||
