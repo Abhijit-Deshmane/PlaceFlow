@@ -257,6 +257,122 @@ export function JobCard({ job, onPress }: JobCardProps) {
 
 ---
 
+## Form Handling (React Hook Form + Zod)
+
+Forms on mobile **MUST** use **`react-hook-form`** with **`@hookform/resolvers/zod`** and Zod schemas (from `@placeflow/shared` or feature-local).
+
+### Rules
+- Always use `useForm<FormValues>` with `resolver: zodResolver(schema)`.
+- Always set explicit `defaultValues`.
+- Always wrap React Native inputs (`TextInput`, custom inputs like `AuthInput`) using `<Controller />` from `react-hook-form`.
+- Read field errors from `fieldState.error?.message` to pass to input `error` or helper text props.
+- Disable submit buttons when `formState.isSubmitting` or when async mutation is pending.
+- NEVER use ad-hoc `useState` dictionaries or manual validation functions for multi-field forms.
+
+### Mobile Form Example
+
+```tsx
+// File: features/jobs/components/ApplyForm.tsx
+import React from "react";
+import { View, Text, TextInput, Pressable, ActivityIndicator } from "react-native";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+
+const applyJobSchema = z.object({
+  fullName: z.string().min(2, "Full name is required"),
+  collegeEmail: z.string().email("Valid college email required"),
+  coverNote: z.string().max(500, "Cover note too long").optional(),
+});
+
+type ApplyJobFormData = z.infer<typeof applyJobSchema>;
+
+interface ApplyFormProps {
+  onSubmit: (data: ApplyJobFormData) => Promise<void>;
+  isLoading?: boolean;
+}
+
+export function ApplyForm({ onSubmit, isLoading }: ApplyFormProps) {
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<ApplyJobFormData>({
+    resolver: zodResolver(applyJobSchema),
+    defaultValues: {
+      fullName: "",
+      collegeEmail: "",
+      coverNote: "",
+    },
+  });
+
+  return (
+    <View className="p-4 bg-white rounded-2xl gap-4">
+      {/* Full Name Field */}
+      <Controller
+        control={control}
+        name="fullName"
+        render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+          <View>
+            <Text className="text-sm font-semibold text-gray-700 mb-1">Full Name</Text>
+            <TextInput
+              className={`border rounded-xl px-4 py-3 text-base text-gray-900 bg-gray-50 ${
+                error ? "border-red-500" : "border-gray-200"
+              }`}
+              placeholder="Jane Doe"
+              onBlur={onBlur}
+              onChangeText={onChange}
+              value={value}
+            />
+            {error && <Text className="text-xs text-red-500 mt-1">{error.message}</Text>}
+          </View>
+        )}
+      />
+
+      {/* College Email Field */}
+      <Controller
+        control={control}
+        name="collegeEmail"
+        render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+          <View>
+            <Text className="text-sm font-semibold text-gray-700 mb-1">College Email</Text>
+            <TextInput
+              className={`border rounded-xl px-4 py-3 text-base text-gray-900 bg-gray-50 ${
+                error ? "border-red-500" : "border-gray-200"
+              }`}
+              placeholder="jane.doe@college.edu"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              onBlur={onBlur}
+              onChangeText={onChange}
+              value={value}
+            />
+            {error && <Text className="text-xs text-red-500 mt-1">{error.message}</Text>}
+          </View>
+        )}
+      />
+
+      {/* Submit Button */}
+      <Pressable
+        onPress={handleSubmit(onSubmit)}
+        disabled={isSubmitting || isLoading}
+        className={`bg-indigo-600 rounded-xl py-3.5 items-center justify-center ${
+          isSubmitting || isLoading ? "opacity-60" : "active:opacity-80"
+        }`}
+      >
+        {isSubmitting || isLoading ? (
+          <ActivityIndicator color="#FFFFFF" size="small" />
+        ) : (
+          <Text className="text-white font-bold text-base">Submit Application</Text>
+        )}
+      </Pressable>
+    </View>
+  );
+}
+```
+
+---
+
 ## Performance Rules
 
 - **`<FlatList>` for all lists.** Never `.map()` on 10+ items in a ScrollView.

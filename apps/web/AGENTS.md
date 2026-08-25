@@ -287,7 +287,108 @@ export function JobCard({ job, onApply, className }: JobCardProps) {
 - Always wrap shadcn primitives in your own feature components. Don't use
   `<Button>` from shadcn directly in page files — create a domain component.
 - Use: `Button`, `Card`, `Input`, `Dialog`, `Sheet`, `Table`, `Badge`,
-  `Avatar`, `Select`, `Skeleton`, `Separator`, `Tabs`, etc.
+  `Avatar`, `Select`, `Skeleton`, `Separator`, `Tabs`, `Form`, etc.
+
+---
+
+## Form Handling (React Hook Form + Zod)
+
+Forms in the web app **MUST** use **`react-hook-form`** with **`@hookform/resolvers/zod`** and Zod schemas (from `@placeflow/shared` or feature-local).
+
+### Rules
+- Always use `useForm<FormValues>` with `resolver: zodResolver(schema)`.
+- Always declare explicit `defaultValues` matching the form type.
+- Derive TypeScript types via `z.infer<typeof schema>`.
+- Use shadcn/ui `<Form>` primitives (`FormField`, `FormItem`, `FormLabel`, `FormControl`, `FormMessage`) for consistent layout and accessibility.
+- Bind mutation state (`isPending`, `error`) from TanStack Query directly to the form submit button and status feedback.
+- Never write manual `useState` objects to manage multi-field form state.
+
+### Web Form Example
+
+```tsx
+// File: features/jobs/components/CreateJobDialog.tsx
+"use client";
+
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { createJobSchema, type CreateJobInput } from "@placeflow/shared";
+import { useCreateJob } from "../hooks/use-jobs";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+interface CreateJobDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export function CreateJobDialog({ open, onOpenChange }: CreateJobDialogProps) {
+  const { mutateAsync: createJob, isPending } = useCreateJob();
+
+  const form = useForm<CreateJobInput>({
+    resolver: zodResolver(createJobSchema),
+    defaultValues: {
+      title: "",
+      company: "",
+      location: "",
+      description: "",
+    },
+  });
+
+  const onSubmit = async (values: CreateJobInput) => {
+    try {
+      await createJob(values);
+      form.reset();
+      onOpenChange(false);
+    } catch {
+      // Error is handled by mutation / toast notification
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Post New Job</DialogTitle>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Job Title</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Software Engineer" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit" disabled={isPending} className="w-full">
+              {isPending ? "Creating..." : "Create Job"}
+            </Button>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+```
 
 ---
 

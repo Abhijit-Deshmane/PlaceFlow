@@ -57,6 +57,7 @@ PlaceFlow/
 | ORM             | Prisma                                  | ^6.x                |
 | Database        | PostgreSQL                              | —                   |
 | Validation      | Zod                                     | ^3.x                |
+| Form Handling   | React Hook Form + @hookform/resolvers (Zod) | ^7.x / ^3.x          |
 | Auth            | Clerk (managed — used on web, mobile, API) | Latest             |
 | Web Framework   | Next.js (App Router)                    | 16.x                |
 | Web UI          | shadcn/ui + Tailwind CSS v4             | Latest              |
@@ -137,7 +138,24 @@ Client (Web/Mobile)
 UI re-renders
 ```
 
-### 8. Git & Code Quality
+### 8. Form Handling & Validation (React Hook Form + Zod)
+
+- **React Hook Form (`react-hook-form`)** is the mandatory standard for form state
+  management across both **Web** and **Mobile** apps.
+- **Zod Validation (`@hookform/resolvers/zod`)**: All forms must be validated using
+  Zod schemas with `zodResolver(schema)`.
+- **Shared Schema Reuse**: Reuse schemas from `@placeflow/shared` for domain
+  mutations (e.g. `createJobSchema`, `updateUserSchema`). For UI-specific forms,
+  define schemas with Zod and infer types via `z.infer<typeof formSchema>`.
+- **Web App**: Integrate `react-hook-form` with shadcn/ui form primitives (`<Form>`,
+  `<FormField>`, `<FormItem>`, `<FormLabel>`, `<FormControl>`, `<FormMessage>`).
+- **Mobile App**: Use the `<Controller />` component from `react-hook-form` to wrap
+  React Native inputs (`TextInput`, custom inputs) and display errors via
+  `fieldState.error?.message`.
+- **No Manual State Accumulators**: Never build multi-field forms using raw
+  `useState` state dictionaries and ad-hoc manual validation functions.
+
+### 9. Git & Code Quality
 
 - Write small, focused commits.
 - Run `pnpm lint` and `pnpm typecheck` before considering work complete.
