@@ -27,6 +27,94 @@ enum UserStatus {
   SUSPENDED
 }
 
+enum PlacementStatus {
+  NOT_PLACED
+  PLACED
+  OPTED_OUT
+}
+
+enum CompanyStatus {
+  ACTIVE
+  INACTIVE
+  PENDING_APPROVAL
+  BLACKLISTED
+}
+
+enum EmploymentType {
+  FULL_TIME
+  INTERNSHIP
+  INTERN_TO_FULL_TIME
+  CONTRACT
+}
+
+enum PlacementDriveStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+  COMPLETED
+  CANCELLED
+}
+
+enum GenderAllowed {
+  ALL
+  MALE_ONLY
+  FEMALE_ONLY
+}
+
+enum ApplicationStatus {
+  APPLIED
+  UNDER_REVIEW
+  SHORTLISTED
+  INTERVIEW
+  SELECTED
+  OFFERED
+  REJECTED
+  WITHDRAWN
+}
+
+enum InterviewStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  RESCHEDULED
+  NO_SHOW
+}
+
+enum InterviewResult {
+  PENDING
+  PASSED
+  FAILED
+  ON_HOLD
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  REVOKED
+  EXPIRED
+}
+
+enum NotificationType {
+  DRIVE_PUBLISHED
+  APPLICATION_STATUS_CHANGED
+  INTERVIEW_SCHEDULED
+  INTERVIEW_RESCHEDULED
+  OFFER_RECEIVED
+  GENERAL_ANNOUNCEMENT
+  SYSTEM
+}
+
+enum DocumentType {
+  RESUME
+  CERTIFICATE
+  OFFER_LETTER
+  TRANSCRIPT
+  ID_PROOF
+  OTHER
+}
+
 // ─── Models ────────────────────────────────────────────────────────────────────
 
 model User {
@@ -39,5 +127,326 @@ model User {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
+  // Relations
+  student           Student?
+  recruiter         Recruiter?
+  createdDrives     PlacementDrive[] @relation("DriveCreator")
+  notifications     Notification[]
+  auditLogs         AuditLog[]
+  uploadedDocuments Document[]       @relation("DocumentUploader")
+  verifiedDocuments Document[]       @relation("DocumentVerifier")
+
   @@map("users")
+}
+
+model Student {
+  id     String @id @default(cuid())
+  userId String @unique
+
+  // Academic Information (Authoritative / Managed by Admin/Staff)
+  enrollmentNumber String          @unique
+  branch           String
+  graduationYear   Int
+  cgpa             Float?
+  percentage       Float?
+  backlogs         Int             @default(0)
+  placementStatus  PlacementStatus @default(NOT_PLACED)
+
+  // Personal & Professional Information (Student Editable)
+  phone            String?
+  altPhone         String?
+  gender           String?
+  dateOfBirth      DateTime?
+  currentAddress   String?
+  permanentAddress String?
+  skills           String[]        @default([])
+  projects         Json?
+  certifications   Json?
+  resumeUrl        String?
+  portfolioUrl     String?
+  githubUrl        String?
+  linkedinUrl      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applications Application[]
+  interviews   Interview[]
+  offers       Offer[]
+  documents    Document[]
+
+  @@index([branch])
+  @@index([graduationYear])
+  @@index([placementStatus])
+  @@index([branch, graduationYear])
+  @@index([cgpa])
+  @@map("students")
+}
+
+model Company {
+  id           String        @id @default(cuid())
+  name         String        @unique
+  website      String?
+  industry     String?
+  description  String?
+  contactEmail String?
+  contactPhone String?
+  address      String?
+  logoUrl      String?
+  status       CompanyStatus @default(ACTIVE)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  // Relations
+  recruiters      Recruiter[]
+  placementDrives PlacementDrive[]
+  offers          Offer[]
+
+  @@index([name])
+  @@index([industry])
+  @@index([status])
+  @@map("companies")
+}
+
+model Recruiter {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  companyId   String
+  designation String?
+  phone       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations (User -> Recruiter -> Company enforces recruiter company isolation)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@map("recruiters")
+}
+
+model PlacementDrive {
+  id                  String               @id @default(cuid())
+  companyId           String
+  title               String
+  description         String
+  jobLocation         String?
+  employmentType      EmploymentType       @default(FULL_TIME)
+  ctc                 String?
+  baseSalary          Float?
+  numberOfPositions   Int?
+  applicationDeadline DateTime
+  driveDate           DateTime?
+  selectionProcess    String?
+  status              PlacementDriveStatus @default(DRAFT)
+  createdById         String?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  // Relations
+  company      Company              @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  createdBy    User?                @relation("DriveCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  eligibility  EligibilityCriteria?
+  applications Application[]
+  interviews   Interview[]
+  offers       Offer[]
+
+  @@index([companyId])
+  @@index([status])
+  @@index([applicationDeadline])
+  @@index([driveDate])
+  @@index([createdAt])
+  @@map("placement_drives")
+}
+
+model EligibilityCriteria {
+  id                     String        @id @default(cuid())
+  placementDriveId       String        @unique
+  minCgpa                Float?
+  minPercentage          Float?
+  maxBacklogs            Int?
+  allowedBranches        String[]      @default([])
+  allowedGraduationYears Int[]         @default([])
+  genderAllowed          GenderAllowed @default(ALL)
+  additionalCriteria     String?
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
+
+  // Relations
+  placementDrive PlacementDrive @relation(fields: [placementDriveId], references: [id], onDelete: Cascade)
+
+  @@map("eligibility_criteria")
+}
+
+model Application {
+  id               String            @id @default(cuid())
+  studentId        String
+  placementDriveId String
+  status           ApplicationStatus @default(APPLIED)
+  resumeUrl        String?
+  coverLetter      String?
+  notes            String?
+  appliedAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  // Relations
+  student        Student        @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  placementDrive PlacementDrive @relation(fields: [placementDriveId], references: [id], onDelete: Cascade)
+  interviews     Interview[]
+  offers         Offer[]
+
+  // Invariant: One student cannot apply to the same placement drive twice
+  @@unique([studentId, placementDriveId])
+  @@index([studentId])
+  @@index([placementDriveId])
+  @@index([status])
+  @@index([placementDriveId, status])
+  @@index([appliedAt])
+  @@map("applications")
+}
+
+model Interview {
+  id               String          @id @default(cuid())
+  applicationId    String
+  studentId        String
+  placementDriveId String
+  roundNumber      Int             @default(1)
+  roundName        String
+  scheduledAt      DateTime
+  durationMinutes  Int?
+  location         String?
+  meetingLink      String?
+  status           InterviewStatus @default(SCHEDULED)
+  feedback         String?
+  result           InterviewResult @default(PENDING)
+  interviewerName  String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  // Relations
+  application    Application    @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  student        Student        @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  placementDrive PlacementDrive @relation(fields: [placementDriveId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId])
+  @@index([studentId])
+  @@index([placementDriveId])
+  @@index([scheduledAt])
+  @@index([status])
+  @@index([result])
+  @@index([placementDriveId, roundNumber])
+  @@map("interviews")
+}
+
+model Offer {
+  id               String      @id @default(cuid())
+  studentId        String
+  companyId        String
+  placementDriveId String
+  applicationId    String?
+  role             String
+  ctc              Float
+  ctcDisplay       String?
+  location         String?
+  offerDate        DateTime    @default(now())
+  joiningDate      DateTime?
+  validUntil       DateTime?
+  status           OfferStatus @default(PENDING)
+  offerLetterUrl   String?
+  remarks          String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  // Relations
+  student        Student        @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  company        Company        @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  placementDrive PlacementDrive @relation(fields: [placementDriveId], references: [id], onDelete: Cascade)
+  application    Application?   @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+
+  @@index([studentId])
+  @@index([companyId])
+  @@index([placementDriveId])
+  @@index([applicationId])
+  @@index([status])
+  @@index([offerDate])
+  @@map("offers")
+}
+
+model Notification {
+  id         String           @id @default(cuid())
+  userId     String
+  type       NotificationType
+  title      String
+  message    String
+  isRead     Boolean          @default(false)
+  readAt     DateTime?
+  entityType String?
+  entityId   String?
+  actionUrl  String?
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model AuditLog {
+  id           String    @id @default(cuid())
+  userId       String?
+  actorRole    UserRole?
+  actorEmail   String?
+  action       String
+  resourceType String
+  resourceId   String?
+  oldValues    Json?
+  newValues    Json?
+  metadata     Json?
+  ipAddress    String?
+  userAgent    String?
+  requestId    String?
+  createdAt    DateTime  @default(now())
+
+  // Relations
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action])
+  @@index([resourceType, resourceId])
+  @@index([createdAt])
+  @@index([requestId])
+  @@map("audit_logs")
+}
+
+model Document {
+  id           String       @id @default(cuid())
+  studentId    String?
+  uploadedById String?
+  type         DocumentType
+  name         String
+  fileUrl      String
+  fileKey      String?
+  mimeType     String?
+  sizeBytes    Int?
+  isVerified   Boolean      @default(false)
+  verifiedAt   DateTime?
+  verifiedById String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  // Relations
+  student    Student? @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  uploadedBy User?    @relation("DocumentUploader", fields: [uploadedById], references: [id], onDelete: SetNull)
+  verifiedBy User?    @relation("DocumentVerifier", fields: [verifiedById], references: [id], onDelete: SetNull)
+
+  @@index([studentId])
+  @@index([type])
+  @@index([createdAt])
+  @@map("documents")
 }
